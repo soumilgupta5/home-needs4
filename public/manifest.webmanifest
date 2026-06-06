@@ -1,0 +1,13 @@
+{
+  "name": "Home Needs",
+  "short_name": "HomeNeeds",
+  "description": "Daily home essentials, delivered from Home Needs Loni",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FEF7E8",
+  "theme_color": "#B91C1C",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
