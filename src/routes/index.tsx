@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
 });
 
 type Product = {
-  id: string; name: string; name_hi: string | null; category: string;
+  id: string; name: string; name_hi: string | null; description: string | null; category: string;
   price_inr: number; image_url: string | null; stock: number;
 };
 
@@ -68,22 +68,50 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header transparent />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
-        <div className="mx-auto max-w-5xl px-4 py-6 sm:py-10">
-          <div className="text-xs uppercase tracking-widest opacity-80">{STORE.city}</div>
-          <h1 className="font-display text-2xl sm:text-4xl font-bold mt-1">{t("welcome")}</h1>
-          <p className="opacity-90 mt-1 text-sm sm:text-base">{t("tagline")}</p>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-secondary text-secondary-foreground text-xs font-semibold px-3 py-1">
-            🛵 {t("loniDelivery")} · {t("freeDelivery")}
+      <section className="bg-[#d22d41] text-primary-foreground relative">
+        <div className="w-full flex flex-col sm:flex-row items-stretch sm:min-h-[160px] md:min-h-[220px]">
+          <div className="w-full pt-16 pb-2 h-[220px] sm:h-auto sm:py-0 sm:w-2/5 md:w-1/3 xl:w-1/4 relative shrink-0 flex">
+            {/* Desktop Logo */}
+            <img 
+              src="/logo.png" 
+              alt="Home Needs Logo" 
+              className="absolute inset-0 w-full h-full object-cover hidden sm:block"
+              style={{
+                objectPosition: "center",
+                WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%)",
+                maskImage: "linear-gradient(to right, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%)"
+              }}
+            />
+            {/* Mobile Logo */}
+            <div className="w-full h-full relative block sm:hidden">
+              <img 
+                src="/logo.png" 
+                alt="Home Needs Logo" 
+                className="absolute inset-0 w-full h-full object-contain"
+                style={{
+                  objectPosition: "center",
+                  WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%)",
+                  maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%)"
+                }}
+              />
+            </div>
+          </div>
+          <div className="px-4 pt-2 pb-10 sm:px-4 sm:pt-20 sm:pb-10 flex-1 relative z-10 flex flex-col justify-center items-center text-center sm:items-start sm:text-left max-w-3xl">
+            <div className="text-xs uppercase tracking-widest opacity-80">{STORE.city}</div>
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mt-1">{t("welcome")}</h1>
+            <p className="opacity-90 mt-2 text-sm sm:text-base md:text-lg">{t("tagline")}</p>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-black/20 text-white text-xs md:text-sm font-semibold px-3 py-1.5">
+              🛵 {t("loniDelivery")} · {t("freeDelivery")}
+            </div>
           </div>
         </div>
       </section>
 
       <main className="mx-auto max-w-5xl px-4 py-4 pb-24">
-        <div className="sticky top-14 z-30 -mx-4 px-4 py-3 bg-background/95 backdrop-blur">
+        <div className="sticky top-0 z-30 -mx-4 px-4 py-3 bg-background/95 backdrop-blur">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search")} className="pl-9 h-11" />
@@ -122,6 +150,7 @@ function HomePage() {
                   </div>
                   <div className="p-3 flex-1 flex flex-col">
                     <div className="text-sm font-medium leading-tight line-clamp-2">{displayName}</div>
+                    {p.description && <div className="mt-1 text-xs text-muted-foreground line-clamp-2">{p.description}</div>}
                     <div className="mt-1 text-xs text-muted-foreground">{catLabel(p.category)}</div>
                     <div className="mt-auto flex items-center justify-between pt-2">
                       <span className="font-bold">{inr(p.price_inr)}</span>
@@ -144,6 +173,28 @@ function HomePage() {
           </div>
         )}
       </main>
+
+      {/* Footer */}
+      <footer className="bg-muted py-8 mt-auto border-t">
+        <div className="mx-auto max-w-5xl px-4 text-center sm:text-left flex flex-col sm:flex-row gap-6 justify-between items-center text-sm text-muted-foreground">
+          <div>
+            <h3 className="font-semibold text-foreground text-base mb-1">Home Needs</h3>
+            <p>
+              <a href="https://maps.app.goo.gl/GYsQuYRKJzUe4AFH8" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors hover:underline">
+                Opposite Town School, Main Road<br />Muradnagar, Ghaziabad - 201206
+              </a>
+            </p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground text-base mb-1 sm:text-right">Contact Us</h3>
+            <p className="sm:text-right">
+              <a href="tel:7417102790" className="hover:text-primary transition-colors">7417102790</a>
+              <span className="mx-2">•</span>
+              <a href="tel:7668859471" className="hover:text-primary transition-colors">7668859471</a>
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -14,14 +14,37 @@ import { inr } from "@/lib/store-config";
 
 export const Route = createFileRoute("/admin/products")({ ssr: false, component: AdminProducts });
 
-type ProductForm = { id?: string; name: string; name_hi: string; category: string; price_inr: string; stock: string; image_url: string; is_active: boolean };
-const empty: ProductForm = { name: "", name_hi: "", category: "Kitchen", price_inr: "", stock: "100", image_url: "", is_active: true };
+type ProductForm = { id?: string; name: string; name_hi: string; description: string; category: string; price_inr: string; stock: string; image_url: string; is_active: boolean };
+const empty: ProductForm = { name: "", name_hi: "", description: "", category: "Kitchen", price_inr: "", stock: "100", image_url: "", is_active: true };
 
 function AdminProducts() {
   const { t } = useI18n();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState<ProductForm>(empty);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!e.target.files || e.target.files.length === 0) return;
+      const file = e.target.files[0];
+      setUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage.from('products').upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('products').getPublicUrl(filePath);
+      setForm({ ...form, image_url: data.publicUrl });
+      toast.success("Image uploaded!");
+    } catch (error: any) {
+      toast.error(error.message || "Error uploading image. Check if 'products' bucket exists and is public.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const { data: products = [] } = useQuery({
     queryKey: ["admin-products"],
@@ -29,14 +52,14 @@ function AdminProducts() {
   });
 
   const startEdit = (p: any) => {
-    setForm({ id: p.id, name: p.name, name_hi: p.name_hi ?? "", category: p.category, price_inr: String(p.price_inr), stock: String(p.stock), image_url: p.image_url ?? "", is_active: p.is_active });
+    setForm({ id: p.id, name: p.name, name_hi: p.name_hi ?? "", description: p.description ?? "", category: p.category, price_inr: String(p.price_inr), stock: String(p.stock), image_url: p.image_url ?? "", is_active: p.is_active });
     setOpen(true);
   };
   const startNew = () => { setForm(empty); setOpen(true); };
 
   const save = async () => {
     const payload = {
-      name: form.name, name_hi: form.name_hi || null, category: form.category,
+      name: form.name, name_hi: form.name_hi || null, description: form.description || null, category: form.category,
       price_inr: Number(form.price_inr), stock: Number(form.stock),
       image_url: form.image_url || null, is_active: form.is_active,
     };
@@ -84,6 +107,7 @@ function AdminProducts() {
           <div className="space-y-3">
             <div><Label>{t("name")}</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
             <div><Label>{t("nameHi")}</Label><Input value={form.name_hi} onChange={(e) => setForm({ ...form, name_hi: e.target.value })} /></div>
+            <div><Label>Description</Label><Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Optional description..." /></div>
             <div><Label>{t("category")}</Label>
               <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
                 <option>Kitchen</option><option>Cleaning</option><option>Storage</option>
@@ -93,7 +117,19 @@ function AdminProducts() {
               <div><Label>{t("price")}</Label><Input type="number" value={form.price_inr} onChange={(e) => setForm({ ...form, price_inr: e.target.value })} /></div>
               <div><Label>{t("stock")}</Label><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></div>
             </div>
-            <div><Label>{t("imageUrl")}</Label><Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://…" /></div>
+            <div><Label>{t("imageUrl")}</Label>
+              {form.image_url && (
+                <div className="my-2 border rounded-md overflow-hidden bg-muted w-24 h-24 flex items-center justify-center relative">
+                  <span className="text-xs text-muted-foreground text-center px-2 absolute">Failed to load</span>
+                  <img src={form.image_url} alt="Preview" className="w-full h-full object-cover absolute inset-0 z-10 bg-muted transition-opacity" onError={(e) => e.currentTarget.style.opacity = '0'} onLoad={(e) => e.currentTarget.style.opacity = '1'} />
+                </div>
+              )}
+              <div className="flex gap-2 items-center mb-2 mt-1">
+                <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} className="text-sm" />
+                {uploading && <span className="text-xs text-muted-foreground animate-pulse whitespace-nowrap">Uploading...</span>}
+              </div>
+              <Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://…" />
+            </div>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />{t("active")}</label>
             <Button className="w-full" onClick={save}>{t("save")}</Button>
           </div>

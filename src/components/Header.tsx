@@ -1,5 +1,5 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { ShoppingCart, User as UserIcon, Languages, LogOut, Shield } from "lucide-react";
+import { ShoppingCart, User as UserIcon, Languages, LogOut, Shield, Home } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
@@ -9,7 +9,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
-export function Header() {
+export function Header({ transparent = false }: { transparent?: boolean } = {}) {
   const { t, lang, setLang } = useI18n();
   const { count } = useCart();
   const { user, isAdmin } = useAuth();
@@ -21,23 +21,28 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b">
-      <div className="mx-auto max-w-5xl px-4 h-14 flex items-center gap-2">
-        <Link to="/" className="flex items-center gap-2 mr-auto">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold">HN</span>
-          <span className="font-display font-bold text-lg tracking-tight">{t("appName")}</span>
+    <header className={transparent 
+      ? "absolute top-0 w-full z-40 text-white" 
+      : "sticky top-0 z-40 bg-background/90 backdrop-blur border-b"
+    }>
+      <div className="w-full px-4 md:px-8 h-14 flex items-center gap-2">
+        <Link to="/" className="mr-auto">
+          <Button variant="ghost" size="sm" className={`gap-2 px-2 ${transparent ? 'hover:bg-white/20 hover:text-white' : ''}`}>
+            <Home className="h-5 w-5" />
+            <span className="font-display font-semibold text-base hidden sm:inline">{t("appName")}</span>
+          </Button>
         </Link>
 
-        <Button variant="ghost" size="sm" onClick={() => setLang(lang === "en" ? "hi" : "en")} className="gap-1">
+        <Button variant="ghost" size="sm" onClick={() => setLang(lang === "en" ? "hi" : "en")} className={`gap-1 ${transparent ? 'hover:bg-white/20 hover:text-white' : ''}`}>
           <Languages className="h-4 w-4" />
           <span className="text-xs font-medium">{lang === "en" ? "हिंदी" : "EN"}</span>
         </Button>
 
         <Link to="/cart">
-          <Button variant="ghost" size="sm" className="relative">
+          <Button variant="ghost" size="sm" className={`relative ${transparent ? 'hover:bg-white/20 hover:text-white' : ''}`}>
             <ShoppingCart className="h-5 w-5" />
             {count > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] font-semibold rounded-full h-4 min-w-4 px-1 flex items-center justify-center">
+              <span className={`absolute -top-1 -right-1 text-[10px] font-semibold rounded-full h-4 min-w-4 px-1 flex items-center justify-center ${transparent ? 'bg-white text-primary' : 'bg-primary text-primary-foreground'}`}>
                 {count}
               </span>
             )}
@@ -47,7 +52,7 @@ export function Header() {
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm"><UserIcon className="h-5 w-5" /></Button>
+              <Button variant="ghost" size="sm" className={transparent ? 'hover:bg-white/20 hover:text-white' : ''}><UserIcon className="h-5 w-5" /></Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild><Link to="/account">{t("account")}</Link></DropdownMenuItem>
@@ -67,7 +72,7 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Link to="/auth"><Button size="sm">{t("login")}</Button></Link>
+          <Link to="/auth"><Button size="sm" variant={transparent ? "secondary" : "default"} className={transparent ? 'bg-white/20 hover:bg-white/30 text-white border-none' : ''}>{t("login")}</Button></Link>
         )}
       </div>
     </header>

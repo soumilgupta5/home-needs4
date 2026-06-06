@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { inr, STORE, pointsForAmount, rupeesForPoints, distanceKm, upiPayUrl } from "@/lib/store-config";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
@@ -264,18 +265,18 @@ function CheckoutPage() {
           </div>
         </Card>
 
-        {(profile?.points_balance ?? 0) > 0 && (
+        {(profile?.points_balance ?? 0) > 0 && maxRedeem > 0 && (
           <Card className="p-4">
-            <div className="flex justify-between items-center mb-2">
-              <strong>{t("redeem")}</strong>
-              <span className="text-sm text-muted-foreground">{t("pointsBalance")}: {profile?.points_balance}</span>
+            <div className="flex justify-between items-center mb-1">
+              <div>
+                <strong className="text-base">{t("redeem")}</strong>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("pointsBalance")}: {profile?.points_balance}</p>
+              </div>
+              <Switch checked={redeemPts > 0} onCheckedChange={(checked) => setRedeemPts(checked ? maxRedeem : 0)} />
             </div>
-            <p className="text-xs text-muted-foreground mb-3">{t("pointsRedeemMax", { n: maxRedeem, r: rupeesForPoints(maxRedeem) })}</p>
-            <div className="flex gap-2">
-              <Input type="number" min={0} max={maxRedeem} value={redeemPts}
-                onChange={(e) => setRedeemPts(Math.max(0, Math.min(maxRedeem, Number(e.target.value) || 0)))} />
-              <Button type="button" variant="outline" onClick={() => setRedeemPts(maxRedeem)}>Max</Button>
-            </div>
+            <p className="text-sm font-medium text-success mt-2">
+              {redeemPts > 0 ? `− ${inr(rupeesForPoints(maxRedeem))} (Applied ${maxRedeem} points)` : t("pointsRedeemMax", { n: maxRedeem, r: rupeesForPoints(maxRedeem) })}
+            </p>
           </Card>
         )}
 
